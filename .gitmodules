@@ -1,0 +1,3 @@
+[submodule "energycore/powertop"]
+	path = energycore/powertop
+	url = ../powertop.git

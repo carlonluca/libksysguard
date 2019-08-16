@@ -33,6 +33,7 @@ endif()
 target_link_libraries(processui
     PUBLIC
         KF5::ProcessCore
+        KF5::EnergyCore
         Qt5::Widgets
         KF5::ConfigCore
     PRIVATE

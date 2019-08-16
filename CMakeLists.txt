@@ -88,6 +88,7 @@ add_definitions(-DQT_NO_NARROWING_CONVERSIONS_IN_CONNECT)
 
 add_subdirectory( lsofui )
 add_subdirectory( processcore )
+add_subdirectory( energycore )
 add_subdirectory( processui )
 if (KF5Plasma_FOUND)
     add_subdirectory( signalplotter )

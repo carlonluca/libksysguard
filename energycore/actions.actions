@@ -1,0 +1,15 @@
+[Domain]
+Name=KSysGuard
+Icon=utilities-system-monitor
+
+[org.kde.ksysguard.energycorehelper.startmonitoring]
+Name=Start monitoring energy consumption
+Name[en_GB]=Start monitoring energy consumption
+Description=Starts monitoring energy consumption
+Description[en_GB]=Starts monitoring energy consumption
+Policy=yes
+
+[org.kde.ksysguard.energycorehelper.stopmonitoring]
+Name=Stop monitoring energy consumption
+Description=Stops monitoring energy consumption
+Policy=yes

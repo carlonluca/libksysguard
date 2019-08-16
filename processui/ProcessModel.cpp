@@ -28,6 +28,7 @@
 
 #include "processcore/processes.h"
 #include "processcore/process.h"
+#include "energycore/energy.h"
 #include "processui_debug.h"
 
 #include <kcolorscheme.h>
@@ -153,6 +154,14 @@ ProcessModel::ProcessModel(QObject* parent, const QString &host)
         d->mHaveXRes = XResQueryExtension(QX11Info::display(), &event, &error) && XResQueryVersion(QX11Info::display(), &major, &minor);
     }
 #endif
+
+    EnergyCore* const energyCore = EnergyCore::instance();
+    connect(energyCore, &EnergyCore::dataUpdated, this, [this] {
+        qDebug("Refresh");
+        QModelIndex indexTop = createIndex(0, ProcessModel::HeadingPower);
+        QModelIndex indexBottom = createIndex(rowCount() - 1, ProcessModel::HeadingPower);
+        emit dataChanged(indexTop, indexBottom);
+    });
 
     if(host.isEmpty() || host == QLatin1String("localhost")) {
         d->mHostName = QString();
@@ -342,6 +351,11 @@ bool ProcessModel::lessThan(const QModelIndex &left, const QModelIndex &right) c
                     return processLeft->ioWriteSyscallsRate() > processRight->ioWriteSyscallsRate();
                 case ProcessModel::ActualBytesRate:
                     return processLeft->ioCharactersActuallyWrittenRate() > processRight->ioCharactersActuallyWrittenRate();
+            }
+        case HeadingPower: {
+            double powerLeft = EnergyCore::instance()->power(processLeft->pid());
+            double powerRight = EnergyCore::instance()->power(processRight->pid());
+            return powerLeft < powerRight;
         }
     }
     //Sort by the display string if we do not have an explicit sorting here
@@ -350,6 +364,7 @@ bool ProcessModel::lessThan(const QModelIndex &left, const QModelIndex &right) c
 
 ProcessModel::~ProcessModel()
 {
+    EnergyCore::instance()->deleteLater();
     delete d;
 }
 
@@ -1391,6 +1406,12 @@ QVariant ProcessModel::data(const QModelIndex &index, int role) const
                     return w->name;
             }
 #endif
+        case HeadingPower: {
+            QString value = EnergyCore::instance()->displayPower(process->pid());
+            if (value.isEmpty())
+                return QStringLiteral("-");
+            return value;
+        }
         default:
             return QVariant();
         }
@@ -1640,6 +1661,9 @@ QVariant ProcessModel::data(const QModelIndex &index, int role) const
 #endif
             return QVariant(QVariant::String);
         }
+        case HeadingPower: {
+            return xi18nc("@info:tooltip", "<para><emphasis strong='true'>Power consumption information</emphasis></para>");
+        }
 
         default:
             return QVariant(QVariant::String);
@@ -1660,6 +1684,7 @@ QVariant ProcessModel::data(const QModelIndex &index, int role) const
             case HeadingVmSize:
             case HeadingIoWrite:
             case HeadingIoRead:
+            case HeadingPower:
                 return QVariant(Qt::AlignRight | Qt::AlignVCenter);
             default:
                 return QVariant(Qt::AlignLeft | Qt::AlignVCenter);
@@ -1943,6 +1968,7 @@ void ProcessModel::setupHeader() {
         headings << i18nc("process heading", "Window Title");
     }
 #endif
+    headings << i18nc("process heading", "Power");
 
     if(d->mHeadings.isEmpty()) { // If it's empty, this is the first time this has been called, so insert the headings
         beginInsertColumns(QModelIndex(), 0, headings.count()-1);

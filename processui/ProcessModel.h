@@ -154,7 +154,8 @@ class KSYSGUARD_EXPORT ProcessModel : public QAbstractItemModel
             HeadingStartTime,
             HeadingCommand,
             HeadingXMemory,
-            HeadingXTitle
+            HeadingXTitle,
+            HeadingPower
         };
 
         enum { UidRole = Qt::UserRole, SortingValueRole, WindowIdRole, PlainValueRole, PercentageRole, PercentageHistoryRole };
